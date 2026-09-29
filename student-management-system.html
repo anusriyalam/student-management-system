@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Management System</title>
+<style>
+:root{--bg:#f4f7fc;--card:#fff;--text:#1f2937;--muted:#6b7280;--primary:#2563eb;--dark:#1d4ed8;--head:#dbeafe;--line:#e5e7eb;--title:#1e3a8a;--input:#cbd5e1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f172a;--card:#1e293b;--text:#e5e7eb;--muted:#94a3b8;--head:#1e3a8a;--line:#334155;--title:#bfdbfe;--input:#475569}}
+:root[data-theme="dark"]{--bg:#0f172a;--card:#1e293b;--text:#e5e7eb;--muted:#94a3b8;--head:#1e3a8a;--line:#334155;--title:#bfdbfe;--input:#475569}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Arial,sans-serif}
+nav{background:var(--dark);color:#fff;padding:14px 20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-size:20px;font-weight:600}
+nav a{color:#fff;text-decoration:none;margin-left:10px;padding:6px 10px;border-radius:6px;cursor:pointer}
+nav a:hover,nav a.on{background:rgba(255,255,255,.22)}
+.wrap{max-width:1000px;margin:28px auto;padding:0 16px}
+h1,h2{color:var(--title)}
+.sub{color:var(--muted);margin-top:-8px}
+.card{background:var(--card);border-radius:12px;padding:22px;box-shadow:0 2px 8px rgba(0,0,0,.1);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.stat{text-align:center}.stat h3{margin:0;font-size:34px;color:var(--primary)}.stat p{margin:4px 0 0;color:var(--muted)}
+.btn{display:inline-block;background:var(--primary);color:#fff;border:0;padding:10px 18px;border-radius:8px;font-size:15px;cursor:pointer;margin:2px 6px 2px 0}
+.btn:hover{background:var(--dark)}.gray{background:#6b7280}.green{background:#16a34a}.red{background:#dc2626}.sm{padding:6px 10px;font-size:13px}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+input,select{width:100%;padding:10px;border:1px solid var(--input);border-radius:8px;font-size:15px;background:var(--card);color:var(--text)}
+input[readonly]{opacity:.65}
+.full{grid-column:1/-1}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--head);color:var(--title)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex}.modal .card{width:100%;max-width:420px;margin:0}
+.msg{font-weight:600;margin-bottom:12px}.ok{color:#16a34a}.err{color:#dc2626}
+section{display:none}section.on{display:block}
+</style>
+</head>
+<body>
+<nav>
+  <span class="brand">🎓 Student Management System</span>
+  <div>
+    <a data-p="home" class="on">Home</a><a data-p="students">Students</a><a data-p="add">Add Student</a><a data-p="about">About</a>
+  </div>
+</nav>
+<div class="wrap">
+
+<section id="home" class="on">
+  <h1>Welcome to Student Management System</h1>
+  <p class="sub">Manage student records efficiently and easily.</p>
+  <div class="grid">
+    <div class="card stat"><h3 id="s1">0</h3><p>Total Students</p></div>
+    <div class="card stat"><h3 id="s2">0</h3><p>Active Students</p></div>
+    <div class="card stat"><h3 id="s3">0</h3><p>Courses</p></div>
+    <div class="card stat"><h3 id="s4">0</h3><p>Departments</p></div>
+  </div>
+  <div class="card">
+    <h2>Student Management</h2>
+    <p>This system helps administrators maintain student records such as student ID, name, email, course, department and year.</p>
+    <button class="btn" onclick="go('add')">Add Student</button>
+    <button class="btn gray" onclick="go('students')">View Students</button>
+  </div>
+</section>
+
+<section id="students">
+  <h1>Student Records</h1>
+  <input id="search" placeholder="Search students..." style="margin-bottom:16px">
+  <div class="card tw"><table>
+    <thead><tr><th>Student ID</th><th>Name</th><th>Email</th><th>Course</th><th>Department</th><th>Year</th><th>Actions</th></tr></thead>
+    <tbody id="tbody"></tbody></table></div>
+</section>
+
+<section id="add">
+  <h1>Add New Student</h1>
+  <div class="card"><div id="addMsg" class="msg"></div>
+    <form id="addForm"></form></div>
+</section>
+
+<section id="edit">
+  <h1>Edit Student</h1>
+  <div class="card"><div id="editMsg" class="msg"></div>
+    <form id="editForm"></form></div>
+</section>
+
+<section id="about">
+  <div class="card">
+    <h1>About Student Management System</h1>
+    <p>This Student Management System is a Java-based application designed to simplify the management of student records. It provides features for adding, viewing, updating, searching and deleting student information.</p>
+    <h2>Technologies Used</h2>
+    <ul><li>Java</li><li>HTML</li><li>CSS</li></ul>
+  </div>
+</section>
+
+</div>
+<div id="modal" class="modal"><div class="card" id="mbody"></div></div>
+
+<script>
+// ---- Student "backend": an array of students, like ArrayList<Student> in Java ----
+var SAMPLE=[
+ {studentId:"101",name:"Ananya",email:"ananya@gmail.com",phone:"9876543210",course:"CSE",department:"Computer Science",year:"1",gender:"Female"},
+ {studentId:"102",name:"Rahul",email:"rahul@gmail.com",phone:"9876543211",course:"CSE",department:"Computer Science",year:"1",gender:"Male"},
+ {studentId:"103",name:"Priya",email:"priya@gmail.com",phone:"9876543212",course:"ECE",department:"Electronics",year:"2",gender:"Female"}];
+var students=null;
+try{students=JSON.parse(localStorage.getItem("sms"))}catch(e){}
+if(!Array.isArray(students))students=SAMPLE.slice();
+function save(){try{localStorage.setItem("sms",JSON.stringify(students))}catch(e){}}
+function find(id){return students.find(function(s){return s.studentId===id})}
+function addStudent(s){if(find(s.studentId))return false;students.push(s);save();return true}
+function updateStudent(s){var i=students.findIndex(function(x){return x.studentId===s.studentId});if(i<0)return false;students[i]=s;save();return true}
+function deleteStudent(id){students=students.filter(function(s){return s.studentId!==id});save()}
+function searchStudents(q){q=q.toLowerCase();return students.filter(function(s){return s.studentId.toLowerCase().indexOf(q)>=0||s.name.toLowerCase().indexOf(q)>=0})}
+
+// ---- Forms (same fields for Add and Edit) ----
+function opts(list){return list.map(function(o){return "<option>"+o+"</option>"}).join("")}
+function formHtml(ro,buttons){
+ return '<div><label>Student ID</label><input name="studentId" required pattern="[0-9]+" title="Numbers only"'+(ro?" readonly":"")+'></div>'+
+ '<div><label>Student Name</label><input name="name" required minlength="2"></div>'+
+ '<div><label>Email</label><input name="email" type="email" required></div>'+
+ '<div><label>Phone Number</label><input name="phone" required pattern="[0-9]{10}" title="Enter 10 digits"></div>'+
+ '<div><label>Course</label><select name="course" required><option value="">Select</option>'+opts(["CSE","ECE","EEE","MECH","CIVIL"])+'</select></div>'+
+ '<div><label>Department</label><select name="department" required><option value="">Select</option>'+opts(["Computer Science","Electronics","Electrical","Mechanical","Civil"])+'</select></div>'+
+ '<div><label>Year</label><select name="year" required><option value="">Select</option>'+opts(["1","2","3","4"])+'</select></div>'+
+ '<div><label>Gender</label><select name="gender" required><option value="">Select</option>'+opts(["Male","Female","Other"])+'</select></div>'+
+ '<div class="full">'+buttons+'</div>';
+}
+var addForm=document.getElementById("addForm"),editForm=document.getElementById("editForm");
+addForm.innerHTML=formHtml(false,'<button class="btn" type="submit">Add Student</button><button class="btn gray" type="reset">Clear</button>');
+editForm.innerHTML=formHtml(true,'<button class="btn" type="submit">Update Student</button><button class="btn gray" type="button" onclick="go(\'students\')">Cancel</button>');
+function formData(f){var o={};for(var i=0;i<f.elements.length;i++){var e=f.elements[i];if(e.name)o[e.name]=e.value.trim()}return o}
+
+addForm.addEventListener("submit",function(e){
+ e.preventDefault();var m=document.getElementById("addMsg");
+ if(addStudent(formData(addForm))){m.className="msg ok";m.textContent="Student added successfully!";addForm.reset()}
+ else{m.className="msg err";m.textContent="Student ID already exists."}
+});
+editForm.addEventListener("submit",function(e){e.preventDefault();updateStudent(formData(editForm));go("students")});
+
+// ---- Students table ----
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function renderTable(){
+ var list=searchStudents(document.getElementById("search").value),h="";
+ list.forEach(function(s){var id=esc(s.studentId);
+  h+="<tr><td>"+id+"</td><td>"+esc(s.name)+"</td><td>"+esc(s.email)+"</td><td>"+esc(s.course)+"</td><td>"+esc(s.department)+"</td><td>"+esc(s.year)+"</td><td>"+
+  '<button class="btn sm" onclick="viewS(\''+id+'\')">View</button>'+
+  '<button class="btn sm green" onclick="editS(\''+id+'\')">Edit</button>'+
+  '<button class="btn sm red" onclick="askDel(\''+id+'\')">Delete</button></td></tr>'});
+ document.getElementById("tbody").innerHTML=h||'<tr><td colspan="7">No students found.</td></tr>';
+}
+document.getElementById("search").addEventListener("input",renderTable);
+
+// ---- View / Edit / Delete ----
+function openM(h){document.getElementById("mbody").innerHTML=h;document.getElementById("modal").classList.add("show")}
+function closeM(){document.getElementById("modal").classList.remove("show")}
+function viewS(id){var s=find(id);if(!s)return;
+ openM("<h2>Student Details</h2>"+[["Student ID","studentId"],["Name","name"],["Email","email"],["Phone","phone"],["Course","course"],["Department","department"],["Year","year"],["Gender","gender"]]
+ .map(function(r){return "<p><b>"+r[0]+":</b> "+esc(s[r[1]])+"</p>"}).join("")+'<button class="btn" onclick="closeM()">Back to Students</button>')}
+function editS(id){var s=find(id);if(!s)return;
+ for(var k in s)if(editForm.elements[k])editForm.elements[k].value=s[k];
+ document.getElementById("editMsg").textContent="";go("edit")}
+function askDel(id){openM("<h2>Are you sure you want to delete this student?</h2>"+
+ '<button class="btn red" onclick="doDel(\''+id+'\')">Yes, Delete</button><button class="btn gray" onclick="closeM()">Cancel</button>')}
+function doDel(id){deleteStudent(id);closeM();renderTable()}
+
+// ---- Home cards & navigation ----
+function stats(){
+ var u=function(k){return new Set(students.map(function(s){return s[k]})).size};
+ document.getElementById("s1").textContent=students.length;
+ document.getElementById("s2").textContent=students.length;
+ document.getElementById("s3").textContent=u("course");
+ document.getElementById("s4").textContent=u("department");
+}
+function go(p){
+ document.querySelectorAll("section").forEach(function(s){s.classList.toggle("on",s.id===p)});
+ document.querySelectorAll("nav a").forEach(function(a){a.classList.toggle("on",a.dataset.p===p||(p==="edit"&&a.dataset.p==="students"))});
+ if(p==="home")stats();if(p==="students")renderTable();
+ window.scrollTo(0,0);
+}
+document.querySelectorAll("nav a").forEach(function(a){a.addEventListener("click",function(){go(a.dataset.p)})});
+document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeM()});
+stats();
+</script>
+</body>
+</html>
